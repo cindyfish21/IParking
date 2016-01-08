@@ -12,6 +12,8 @@ import android.widget.RelativeLayout;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -41,7 +43,8 @@ public class MapsFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if(mMap != null) {
-            mMap = null;  //第一次成功開啟地圖之外，每次開啟fragment都先初始化mMap
+            //mMap.clear();  //第一次成功開啟地圖之外，每次開啟fragment都先初始化mMap
+            mMap = null;
         }
         setUpMapIfNeeded();
     }
@@ -67,7 +70,11 @@ public class MapsFragment extends Fragment {
     //設置地圖
     private static void setUpMap() {
         mMap.setMyLocationEnabled(true);  //顯示自己的位置
-        mMap.addMarker(new MarkerOptions().position(new LatLng(latitude_target, longitude_target)).title("車子").snippet("car"));  //目標位置
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude_target, longitude_target), 17.5f));  //設定初始縮放
+        MarkerOptions makerOptions = new MarkerOptions();
+        makerOptions.position(new LatLng(latitude_target, longitude_target));
+        makerOptions.title("你的車子");
+        makerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.parking));
+        mMap.addMarker(makerOptions);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude_target, longitude_target), 15f));  //設定初始縮放
     }
 }
