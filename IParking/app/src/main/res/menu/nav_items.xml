@@ -3,11 +3,10 @@
 
     <group android:checkableBehavior="single">
         <item android:id="@+id/nav_map" android:icon="@drawable/map"
-            android:title="Map" />
+            android:title="地圖" />
         <item android:id="@+id/nav_bluetooth" android:icon="@drawable/bluetooth"
-            android:title="Bluetooth Device" />
-        <item android:id="@+id/nav_manage" android:icon="@android:drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="藍芽"
+            android:checked="true"/>
     </group>
 
     <!--<item android:title="Communicate">

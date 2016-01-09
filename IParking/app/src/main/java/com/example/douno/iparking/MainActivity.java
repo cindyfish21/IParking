@@ -117,9 +117,6 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_bluetooth:
                 fragment = new BluetoothFragment();
                 break;
-            case R.id.nav_manage:
-                //還不知道要放什麼
-                break;
         }
 
         fragmentManager.beginTransaction().replace(R.id.content, fragment).commit();
@@ -128,4 +125,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
 }

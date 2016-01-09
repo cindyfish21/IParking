@@ -2,10 +2,14 @@ package com.example.douno.iparking;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,12 +27,18 @@ import java.util.Set;
 public class BluetoothFragment extends Fragment {
 
     private static View view;
-    Button Devices_Button;
-    ListView devicelist;
+    private Button Devices_Button;
+    private TextView textView_bounded;
+    private TextView textView_unbounded;
+    private ListView devicelist;
+    private ListView deviceList_unbounded;
 
     private BluetoothAdapter myBluetooth = null;
+    Intent turnBTon;
     private Set<BluetoothDevice> pairedDevices;
     public static String EXTRA_ADDRESS = "device_address";
+    ArrayList list = new ArrayList();
+    ArrayList list_unBounded = new ArrayList();
 
     @Nullable
     @Override
@@ -37,21 +47,29 @@ public class BluetoothFragment extends Fragment {
             return null;
         view = (RelativeLayout)inflater.inflate(R.layout.fragment_bluetooth, container, false);
 
-        Devices_Button = (Button)view.findViewById(R.id.Devices_Button);
+        textView_bounded = (TextView) view.findViewById(R.id.textView);
+        textView_unbounded = (TextView) view.findViewById(R.id.textView_unBounded);
         devicelist = (ListView)view.findViewById(R.id.listView);
+        deviceList_unbounded = (ListView) view.findViewById(R.id.listView_unBounded);
+        Devices_Button = (Button)view.findViewById(R.id.Devices_Button);
+
+
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
+
+        IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        //註冊廣播接收器
+        getActivity().registerReceiver(mReceiver, intentFilter);
 
         if(myBluetooth == null)
         {
             //Show a mensag. that the device has no bluetooth adapter
             Toast.makeText(view.getContext(), "Bluetooth Device Not Available", Toast.LENGTH_LONG).show();
-            //finish apk
-            ///finish();
         }
         else if(!myBluetooth.isEnabled())
         {
             //Ask to the user turn the bluetooth on
-            Intent turnBTon = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            turnBTon = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            mReceiver.onReceive(getContext(), turnBTon);
             startActivityForResult(turnBTon,1);
         }
 
@@ -59,6 +77,13 @@ public class BluetoothFragment extends Fragment {
             @Override
             public void onClick(View v)
             {
+                textView_bounded.setVisibility(View.INVISIBLE);
+                textView_unbounded.setVisibility(View.INVISIBLE);
+                list.clear();
+                list_unBounded.clear();
+                new Thread(runnable).start();
+                //for (BluetoothDevice bt : myBluetooth.getName())
+
                 pairedDevicesList();
             }
         });
@@ -67,13 +92,14 @@ public class BluetoothFragment extends Fragment {
     private void pairedDevicesList()
     {
         pairedDevices = myBluetooth.getBondedDevices();
-        ArrayList list = new ArrayList();
+
 
         if (pairedDevices.size()>0)
         {
             for(BluetoothDevice bt : pairedDevices)
             {
                 list.add(bt.getName() + "\n" + bt.getAddress()); //Get the device's name and the address
+                textView_bounded.setVisibility(View.VISIBLE);
             }
         }
         else
@@ -81,11 +107,30 @@ public class BluetoothFragment extends Fragment {
             Toast.makeText(view.getContext(), "No Paired Bluetooth Devices Found.", Toast.LENGTH_LONG).show();
         }
 
-        final ArrayAdapter adapter = new ArrayAdapter(view.getContext(),android.R.layout.simple_list_item_1, list);
+        ArrayAdapter adapter = new ArrayAdapter(view.getContext(),android.R.layout.simple_list_item_1, list);
         devicelist.setAdapter(adapter);
         devicelist.setOnItemClickListener(myListClickListener); //Method called when the device from the list is clicked
 
     }
+
+    @Override
+    public void onDestroy() {
+        getActivity().unregisterReceiver(mReceiver);
+        super.onDestroy();
+
+    }
+
+    Runnable runnable = new Runnable(){
+        @Override
+        public void run() {
+
+            myBluetooth.startDiscovery();
+
+
+        }
+    };
+
+
 
     private AdapterView.OnItemClickListener myListClickListener = new AdapterView.OnItemClickListener()
     {
@@ -101,10 +146,24 @@ public class BluetoothFragment extends Fragment {
             bundle.putString("EXTRA_ADDRESS", address);  //藍芽address
             intent.putExtras(bundle);
             getActivity().startService(intent);
+        }
+    };
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //獲得掃描到的遠端藍牙設備
+            String action = intent.getAction();
 
-            //Change the activity.
-           // i.putExtra(EXTRA_ADDRESS, address); //this will be received at ledControl (class) Activity
-           // startActivity(i);
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                //System.out.println(device.getAddress());
+                Log.i("1111","1");
+                textView_unbounded.setVisibility(View.VISIBLE);
+                list_unBounded.add(device.getName() + "\n" + device.getAddress());
+                ArrayAdapter adapter = new ArrayAdapter(view.getContext(),android.R.layout.simple_list_item_1, list_unBounded);
+                deviceList_unbounded.setAdapter(adapter);
+                deviceList_unbounded.setOnItemClickListener(myListClickListener); //Method called when the device from the list is clicked
+            }
         }
     };
 }
