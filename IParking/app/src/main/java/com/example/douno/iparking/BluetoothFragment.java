@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -27,7 +28,7 @@ import java.util.Set;
 public class BluetoothFragment extends Fragment {
 
     private static View view;
-    private Button Devices_Button;
+    private ImageButton Devices_Button;
     private TextView textView_bounded;
     private TextView textView_unbounded;
     private ListView devicelist;
@@ -51,7 +52,7 @@ public class BluetoothFragment extends Fragment {
         textView_unbounded = (TextView) view.findViewById(R.id.textView_unBounded);
         devicelist = (ListView)view.findViewById(R.id.listView);
         deviceList_unbounded = (ListView) view.findViewById(R.id.listView_unBounded);
-        Devices_Button = (Button)view.findViewById(R.id.Devices_Button);
+        Devices_Button = (ImageButton)view.findViewById(R.id.Devices_Button);
 
 
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
